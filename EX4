@@ -1,0 +1,67 @@
+def generate_vigenere_table():
+    table = []
+    for i in range(26):
+        row = []
+        for j in range(26):
+            row.append(chr((i + j) % 26 + ord('A')))
+        table.append(row)
+    return table
+
+def generate_key(message, key):
+    key = list(key)
+    if len(message) == len(key):
+        return key
+    else:
+        for i in range(len(message) - len(key)):
+            key.append(key[i % len(key)])
+    return "".join(key)
+
+def vigenere_encrypt(message, key):
+    table = generate_vigenere_table()
+    key = generate_key(message, key)
+    cipher_text = []
+    
+    for i in range(len(message)):
+        if message[i].isalpha():
+            row = ord(key[i]) - ord('A')
+            col = ord(message[i]) - ord('A')
+            cipher_text.append(table[row][col])
+        else:
+            cipher_text.append(message[i])
+    
+    return "".join(cipher_text)
+
+def vigenere_decrypt(cipher_text, key):
+    table = generate_vigenere_table()
+    key = generate_key(cipher_text, key)
+    original_text = []
+    
+    for i in range(len(cipher_text)):
+        if cipher_text[i].isalpha():
+            row = ord(key[i]) - ord('A')
+            col = table[row].index(cipher_text[i])
+            original_text.append(chr(col + ord('A')))
+        else:
+            original_text.append(cipher_text[i])
+    
+    return "".join(original_text)
+
+def main():
+    message = input("Enter the message: ").upper().replace(" ", "")
+    key = input("Enter the key: ").upper().replace(" ", "")
+    
+    encrypted_message = vigenere_encrypt(message, key)
+    print("Encrypted message:", encrypted_message)
+    
+    decrypted_message = vigenere_decrypt(encrypted_message, key)
+    print("Decrypted message:", decrypted_message)
+
+if __name__ == "__main__":
+    main()
+
+OUTPUT:
+
+Enter the message: hi
+Enter the key: 3
+Encrypted message: TU
+Decrypted message: HI
