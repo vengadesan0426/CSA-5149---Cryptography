@@ -1,0 +1,70 @@
+def rail_fence_encrypt_row(plaintext, num_rails):
+    if num_rails <= 1:
+        return plaintext
+
+    # Create a 2D list for the rails
+    rails = [[] for _ in range(num_rails)]
+    direction = 1  # 1 for down, -1 for up
+    rail = 0
+
+    # Place characters in the rails
+    for char in plaintext:
+        rails[rail].append(char)
+        rail += direction
+        if rail == 0 or rail == num_rails - 1:
+            direction *= -1
+
+    # Read the rails row by row
+    ciphertext = ''.join([''.join(row) for row in rails])
+    return ciphertext
+
+def rail_fence_decrypt_row(ciphertext, num_rails):
+    if num_rails <= 1:
+        return ciphertext
+
+    # Determine the length of each rail
+    rail_lengths = [0] * num_rails
+    direction = 1
+    rail = 0
+
+    for char in ciphertext:
+        rail_lengths[rail] += 1
+        rail += direction
+        if rail == 0 or rail == num_rails - 1:
+            direction *= -1
+
+    # Reconstruct the rails
+    rails = []
+    index = 0
+    for length in rail_lengths:
+        rails.append(list(ciphertext[index:index+length]))
+        index += length
+
+    # Read the rails in zigzag order to get the plaintext
+    plaintext = []
+    rail = 0
+    direction = 1
+
+    for _ in range(len(ciphertext)):
+        plaintext.append(rails[rail].pop(0))
+        rail += direction
+        if rail == 0 or rail == num_rails - 1:
+            direction *= -1
+
+    return ''.join(plaintext)
+
+# Example usage
+plaintext = "HELLOTHISISARAILFENCECIPHER"
+num_rails = 3
+
+ciphertext = rail_fence_encrypt_row(plaintext, num_rails)
+print("Encrypted (Row):", ciphertext)
+
+decrypted_text = rail_fence_decrypt_row(ciphertext, num_rails)
+print("Decrypted (Row):", decrypted_text)
+
+
+OUTPUT:
+
+Encrypted (Row): HOSRFEHELTIIAALECCPELHSINIR
+Decrypted (Row): HELLOTHISISARAILFENCECIPHER
