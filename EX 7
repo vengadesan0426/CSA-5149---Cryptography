@@ -1,0 +1,79 @@
+import random
+
+def is_prime(num):
+    if num <= 1:
+        return False
+    if num <= 3:
+        return True
+    if num % 2 == 0 or num % 3 == 0:
+        return False
+    i = 5
+    while i * i <= num:
+        if num % i == 0 or num % (i + 2) == 0:
+            return False
+        i += 6
+    return True
+
+def gcd(a, b):
+    while b != 0:
+        a, b = b, a % b
+    return a
+
+def mod_inverse(a, m):
+    m0, x0, x1 = m, 0, 1
+    if m == 1:
+        return 0
+    while a > 1:
+        q = a // m
+        m, a = a % m, m
+        x0, x1 = x1 - q * x0, x0
+    if x1 < 0:
+        x1 += m0
+    return x1
+
+def generate_keypair(keysize):
+    p = q = 1
+    while not is_prime(p):
+        p = random.getrandbits(keysize)
+    while not is_prime(q) or q == p:
+        q = random.getrandbits(keysize)
+    
+    n = p * q
+    phi = (p - 1) * (q - 1)
+    
+    e = d = 1
+    while gcd(e, phi) != 1:
+        e = random.randrange(2, phi)
+    d = mod_inverse(e, phi)
+    
+    return ((e, n), (d, n))
+
+def encrypt(pk, plaintext):
+    key, n = pk
+    cipher = [(ord(char) ** key) % n for char in plaintext]
+    return cipher
+
+def decrypt(pk, ciphertext):
+    key, n = pk
+    plain = [chr((char ** key) % n) for char in ciphertext]
+    return ''.join(plain)
+
+# Example usage:
+keysize = 8  # Small keysize for demonstration, not secure
+public, private = generate_keypair(keysize)
+print("Public Key:", public)
+print("Private Key:", private)
+
+message = "HELLO"
+encrypted_msg = encrypt(public, message)
+print("Encrypted message:", encrypted_msg)
+
+decrypted_msg = decrypt(private, encrypted_msg)
+print("Decrypted message:", decrypted_msg)
+
+OUTPUT:
+
+Public Key: (1, 8479)
+Private Key: (1, 8479)
+Encrypted message: [72, 69, 76, 76, 79]
+Decrypted message: HELLO
