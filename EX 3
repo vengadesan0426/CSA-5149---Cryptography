@@ -1,0 +1,61 @@
+import numpy as np
+
+def create_key_matrix(key, n):
+    key_matrix = []
+    key = key.replace(" ", "").upper()
+    for i in range(n):
+        row = [ord(char) - ord('A') for char in key[i*n:(i+1)*n]]
+        key_matrix.append(row)
+    return np.array(key_matrix)
+
+def text_to_numbers(text, n):
+    text = text.replace(" ", "").upper()
+    if len(text) % n != 0:
+        text += 'X' * (n - len(text) % n)  # Padding with 'X'
+    text_numbers = [ord(char) - ord('A') for char in text]
+    return np.array(text_numbers).reshape(-1, n)
+
+def numbers_to_text(numbers):
+    text = ''.join(chr(num + ord('A')) for num in numbers.flatten())
+    return text
+
+def hill_cipher_encrypt(plaintext, key, n):
+    key_matrix = create_key_matrix(key, n)
+    plaintext_numbers = text_to_numbers(plaintext, n)
+    ciphertext_numbers = (np.dot(plaintext_numbers, key_matrix) % 26).flatten()
+    ciphertext = numbers_to_text(ciphertext_numbers)
+    return ciphertext
+
+def hill_cipher_decrypt(ciphertext, key, n):
+    key_matrix = create_key_matrix(key, n)
+    determinant = int(round(np.linalg.det(key_matrix)))
+    determinant_inv = pow(determinant, -1, 26)
+    key_matrix_inv = determinant_inv * np.round(determinant * np.linalg.inv(key_matrix)).astype(int) % 26
+    ciphertext_numbers = text_to_numbers(ciphertext, n)
+    plaintext_numbers = (np.dot(ciphertext_numbers, key_matrix_inv) % 26).flatten()
+    plaintext = numbers_to_text(plaintext_numbers)
+    return plaintext
+
+def main():
+    n = int(input("Enter the size of the key matrix (2 for 2x2, 3 for 3x3, etc.): "))
+    key = input("Enter the key: ").replace(" ", "").upper()
+    plaintext = input("Enter the plaintext: ")
+
+    if len(key) != n * n:
+        print("Error: The key length must be equal to n*n.")
+        return
+
+    ciphertext = hill_cipher_encrypt(plaintext, key, n)
+    print("Encrypted message:", ciphertext)
+
+    decrypted_text = hill_cipher_decrypt(ciphertext, key, n)
+    print("Decrypted message:", decrypted_text)
+
+if __name__ == "__main__":
+    main()
+
+OUTPUT:
+
+Enter the size of the key matrix (2 for 2x2, 3 for 3x3, etc.): 1
+Enter the key: 1
+Enter the plaintext: e
